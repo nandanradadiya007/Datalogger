@@ -1,14 +1,32 @@
-# Datalogger
+# Lab Data Acquisition System
 
-A Windows desktop application (WPF, .NET) that records pressure data from NI pressure transducers via NI-DAQmx and supports logging to CSV files.
+A comprehensive Windows desktop application (WPF, .NET) for laboratory data acquisition and control. Records data from pressure transducers, thermocouples via NI-DAQmx, and provides valve control, real-time visualization, and calibration management.
 
 ## Features
 
-- **Data Acquisition**: Real-time acquisition from NI-DAQmx compatible devices
+### Multi-Sensor Support
+- **Pressure Transducers**: Real-time acquisition from NI-DAQmx compatible devices
+- **Thermocouples**: Temperature monitoring with 4 independent channels
+- **Valve Controls**: Digital control and monitoring of up to 4 valves
+
+### Professional User Interface
+- **Menu Bar**: Complete File, Edit, View, Tools, and Help menus following Windows conventions
+- **Dashboard View**: Unified control panel for all sensors and devices
+- **Graph View**: Real-time visualization of pressure and temperature data
+- **Data Table**: Tabular view of all acquired data with export capabilities
+- **Calibration Manager**: Load, save, and manage sensor calibrations
+
+### Data Management
+- **Multiple Export Formats**: CSV, JSON, and Excel-ready
+- **Session Management**: Save and load complete acquisition sessions
+- **Real-time Logging**: Timestamped data logging with async, non-blocking writes
+- **Calibration System**: Apply calibration curves to raw sensor data
+
+### Configuration & Control
 - **Flexible Configuration**: Configure device/channel, sample rate, and samples per read
-- **CSV Logging**: Timestamped data logging with async, non-blocking writes
 - **Real-time Display**: View latest values and recent sample history
-- **User-friendly UI**: Clean WPF interface with status indicators
+- **Valve Control**: Toggle valves on/off with status indicators
+- **Temperature Display**: Multi-channel thermocouple readings in Celsius
 
 ## Technology Stack
 
@@ -22,16 +40,19 @@ A Windows desktop application (WPF, .NET) that records pressure data from NI pre
 ```
 PressureDataLogger/
 ├── Models/
-│   ├── AppConfiguration.cs    # Application configuration and defaults
-│   └── PressureSample.cs       # Data model for pressure samples
+│   ├── AppConfiguration.cs       # Application configuration and defaults
+│   ├── PressureSample.cs          # Data model for pressure samples
+│   ├── TemperatureSample.cs       # Data model for temperature samples
+│   ├── ValveState.cs              # Data model for valve states
+│   └── CalibrationData.cs         # Calibration data and coefficients
 ├── Interfaces/
-│   ├── IDAQManager.cs          # DAQ service interface
-│   └── ICSVLogger.cs           # CSV logging interface
+│   ├── IDAQManager.cs             # DAQ service interface
+│   └── ICSVLogger.cs              # CSV logging interface
 ├── Services/
-│   ├── DAQManager.cs           # NI-DAQmx acquisition service
-│   └── CSVLogger.cs            # CSV logging service
-├── MainWindow.xaml             # Main UI layout
-└── MainWindow.xaml.cs          # Main UI code-behind
+│   ├── DAQManager.cs              # NI-DAQmx acquisition service
+│   └── CSVLogger.cs               # CSV logging service
+├── MainWindow.xaml                # Main UI layout with menu bar and tabs
+└── MainWindow.xaml.cs             # Main UI code-behind
 ```
 
 ## Prerequisites
@@ -104,6 +125,55 @@ PressureDataLogger/bin/Debug/net6.0-windows/PressureDataLogger.exe
 
 ## Running the Application
 
+### Application Layout
+
+The application features a professional Windows-style interface with:
+
+1. **Menu Bar**
+   - **File**: New session, Open, Save, Export (CSV/JSON/Excel), Exit
+   - **Edit**: Configuration, Clear data
+   - **View**: Switch between Dashboard, Graphs, Data Table, and Calibrations
+   - **Tools**: Device configuration, Calibration wizard, Valve controls, Settings
+   - **Help**: User guide and About information
+
+2. **Toolbar**: Quick access buttons for common actions
+
+3. **Main Tabs**
+   - **Dashboard**: Control panel for all sensors and devices
+   - **Graphs**: Real-time visualization (placeholders for charting)
+   - **Data Table**: Tabular view of acquired data
+   - **Calibrations**: Calibration management
+   - **CSV Logging**: Configure and control data logging
+
+### Using Pressure Transducers
+
+1. Navigate to the **Dashboard** tab
+2. In the **Pressure Transducers** section:
+   - **Device/Channel**: Enter your device channel (e.g., `Dev1/ai0`)
+   - **Sample Rate**: Set acquisition rate in Hz (default: 1000)
+   - **Samples Per Read**: Set buffer size (default: 100)
+3. Click **Start** to begin pressure data collection
+4. Latest pressure reading displays in the blue box
+5. Click **Stop** to end acquisition
+
+### Using Thermocouples
+
+1. Navigate to the **Dashboard** tab
+2. In the **Thermocouples** section:
+   - Click **Start** to begin temperature monitoring
+   - View real-time temperature from 4 channels (TC1-TC4)
+   - Temperatures displayed in Celsius
+3. Click **Stop** to end temperature acquisition
+
+### Controlling Valves
+
+1. Navigate to the **Dashboard** tab
+2. In the **Valve Controls** section:
+   - Click any valve button (Valve 1-4) to toggle state
+   - **Gray button** = CLOSED
+   - **Green button** = OPEN
+   - Status updates display in the status bar
+
 ### With NI-DAQmx Hardware
 
 1. Ensure NI-DAQmx drivers are installed
@@ -126,15 +196,63 @@ The application will automatically run in simulation mode if NI-DAQmx is not ava
 
 ## Using CSV Logging
 
-1. Click **Browse** to select a log file location
-2. Click **Start Logging** to begin recording data
-3. Data is saved with format: `Timestamp,Value`
-4. Example CSV output:
+1. Navigate to the **CSV Logging** tab (or use Dashboard controls)
+2. Click **Browse** to select a log file location
+3. Click **Start Logging** to begin recording data
+4. Data is saved with format: `Timestamp,Value`
+5. Example CSV output:
    ```
    Timestamp,Value
    2024-01-09 14:30:15.123,5.234567
    2024-01-09 14:30:15.124,5.189234
    ```
+
+## Exporting Data
+
+### Export to CSV
+1. Go to **File** → **Export Data** → **Export to CSV...**
+2. Choose location and filename
+3. All current session data is exported
+
+### Export to JSON
+1. Go to **File** → **Export Data** → **Export to JSON...**
+2. Choose location and filename
+3. Data is exported in JSON format with indentation
+
+### Export to Excel
+Coming in a future update - currently shows notification dialog
+
+## Calibration Management
+
+### Loading Calibrations
+1. Navigate to the **Calibrations** tab
+2. Click **Load Calibration**
+3. Select a calibration file (*.cal or *.json)
+
+### Saving Calibrations
+1. Navigate to the **Calibrations** tab
+2. Click **Save Calibration**
+3. Choose location and filename
+
+### Using Calibration Wizard
+1. Go to **Tools** → **Calibration Wizard...**
+2. Follow the wizard to:
+   - Select sensor to calibrate
+   - Apply known reference values
+   - Calculate calibration coefficients
+   - Save calibration data
+
+## Session Management
+
+### New Session
+- **File** → **New Session** - Clears all current data and starts fresh
+
+### Save Session
+- **File** → **Save Session** - Saves current configuration and data
+- **File** → **Save Session As...** - Save with a new filename
+
+### Open Session
+- **File** → **Open Session...** - Load a previously saved session
 
 ## Configuration Defaults
 
@@ -184,6 +302,89 @@ All hardware integration points are marked with `TODO` comments in:
 - `Services/DAQManager.cs` - Lines with DAQmx API calls
 
 ## Troubleshooting
+
+### Build Issues
+
+**Error: "To build a project targeting Windows on this operating system..."**
+- This is expected on non-Windows systems
+- The application is Windows-only and requires Windows to build/run
+
+**Warning: "The target framework 'net6.0-windows' is out of support..."**
+- This is a warning about .NET 6 reaching end-of-life
+- The application will still build and run
+- Consider upgrading to .NET 8 for long-term support
+
+### Runtime Issues
+
+**"Failed to start acquisition" error:**
+- Check that your device name is correct (use NI MAX)
+- Verify NI-DAQmx drivers are installed
+- Ensure no other application is using the device
+- Check that the channel configuration matches your hardware
+
+**Data not appearing:**
+- Verify acquisition is started (green status indicator)
+- Check sample rate is appropriate for your application
+- Ensure the device is properly connected
+
+**Temperature readings showing "-- °C":**
+- Click **Start** button in Thermocouples section
+- Simulated data will appear if no hardware is connected
+
+**Valves not responding:**
+- Click directly on valve buttons to toggle
+- Button color changes: Gray (closed) or Green (open)
+- Check status bar for valve state confirmations
+
+### CSV Logging Issues
+
+**"Failed to start logging" error:**
+- Check that the file path is valid
+- Ensure you have write permissions to the directory
+- Verify the disk has sufficient space
+
+## New Features in Version 2.0
+
+### User Interface Enhancements
+- ✅ Professional menu bar (File, Edit, View, Tools, Help)
+- ✅ Toolbar with quick action buttons
+- ✅ Tab-based navigation system
+- ✅ Improved dashboard layout
+- ✅ Status bar with contextual messages
+
+### Multi-Sensor Support
+- ✅ 4-channel thermocouple temperature monitoring
+- ✅ Simulated temperature acquisition
+- ✅ Temperature display in Celsius
+- ✅ Future: Fahrenheit and Kelvin conversions
+
+### Valve Control System
+- ✅ 4 digital valve controls
+- ✅ Toggle on/off functionality
+- ✅ Visual status indicators (color-coded)
+- ✅ State tracking and logging
+
+### Data Management
+- ✅ Export to CSV
+- ✅ Export to JSON
+- ✅ Session save/load framework
+- ✅ Clear data functionality
+- ⏳ Excel export (coming soon)
+
+### Calibration System
+- ✅ Calibration data models
+- ✅ Calibration tab interface
+- ✅ Load/Save calibration files
+- ⏳ Calibration wizard (coming soon)
+- ⏳ Apply calibrations to readings (coming soon)
+
+### Graph Visualization
+- ✅ Graph tab with placeholders
+- ⏳ Real-time pressure plotting (coming soon)
+- ⏳ Real-time temperature plotting (coming soon)
+- ⏳ Charting library integration (coming soon)
+
+## Troubleshooting (Legacy)
 
 ### Build Issues
 
