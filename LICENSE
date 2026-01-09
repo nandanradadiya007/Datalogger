@@ -1,0 +1,44 @@
+MIT License
+
+Copyright (c) 2024 Pressure Data Logger Contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+THIRD-PARTY NOTICES
+
+This software may interact with the following third-party software:
+
+1. Microsoft .NET 6.0
+   - License: MIT License
+   - Copyright: Microsoft Corporation
+   - https://github.com/dotnet/runtime/blob/main/LICENSE.TXT
+
+2. National Instruments NI-DAQmx (Optional)
+   - License: National Instruments Software License Agreement
+   - Copyright: National Instruments Corporation
+   - Note: NI-DAQmx is not included with this software and must be
+     obtained separately from National Instruments.
+   - https://www.ni.com/en-us/support/documentation/supplemental/18/ni-daqmx-software-license.html
+
+This software is designed to work with NI-DAQmx but does not include or
+redistribute any National Instruments proprietary software. Users must
+obtain NI-DAQmx drivers separately from National Instruments and comply
+with National Instruments' license terms.
