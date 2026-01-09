@@ -8,8 +8,6 @@ A professional-grade Windows desktop application for comprehensive laboratory da
 
 ### ✅ Completed Features (Version 2.0)
 
-### ✅ Completed Features (Version 2.0)
-
 1. **Professional User Interface**
    - Complete menu bar (File, Edit, View, Tools, Help)
    - Toolbar with quick-access buttons
