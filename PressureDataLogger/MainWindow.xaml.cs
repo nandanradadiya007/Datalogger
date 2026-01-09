@@ -50,18 +50,71 @@ public partial class MainWindow : Window
             _valves.Add(new ValveState($"V{i}", $"Valve {i}", false, $"Lab valve {i}"));
         }
 
-        // Wire up event handlers
+        // Wire up DAQ event handlers
         _daqManager.DataAcquired += OnDataAcquired;
         _daqManager.ErrorOccurred += OnErrorOccurred;
 
+        // Wire up Menu Bar events
+        menuBar.FileNew += (s, e) => MenuFileNew_Click(s, e);
+        menuBar.FileOpen += (s, e) => MenuFileOpen_Click(s, e);
+        menuBar.FileSave += (s, e) => MenuFileSave_Click(s, e);
+        menuBar.FileSaveAs += (s, e) => MenuFileSaveAs_Click(s, e);
+        menuBar.ExportCsv += (s, e) => MenuExportCsv_Click(s, e);
+        menuBar.ExportExcel += (s, e) => MenuExportExcel_Click(s, e);
+        menuBar.ExportJson += (s, e) => MenuExportJson_Click(s, e);
+        menuBar.FileExit += (s, e) => MenuFileExit_Click(s, e);
+        menuBar.EditConfig += (s, e) => MenuEditConfig_Click(s, e);
+        menuBar.EditClear += (s, e) => MenuEditClear_Click(s, e);
+        menuBar.ViewDashboard += (s, e) => MenuViewDashboard_Click(s, e);
+        menuBar.ViewGraphs += (s, e) => MenuViewGraphs_Click(s, e);
+        menuBar.ViewDataTable += (s, e) => MenuViewDataTable_Click(s, e);
+        menuBar.ViewCalibrations += (s, e) => MenuViewCalibrations_Click(s, e);
+        menuBar.ToolsDeviceConfig += (s, e) => MenuToolsDeviceConfig_Click(s, e);
+        menuBar.ToolsCalibration += (s, e) => MenuToolsCalibration_Click(s, e);
+        menuBar.ToolsValves += (s, e) => MenuToolsValves_Click(s, e);
+        menuBar.ToolsSettings += (s, e) => MenuToolsSettings_Click(s, e);
+        menuBar.HelpGuide += (s, e) => MenuHelpGuide_Click(s, e);
+        menuBar.HelpAbout += (s, e) => MenuHelpAbout_Click(s, e);
+
+        // Wire up Toolbar events
+        toolBar.NewSession += (s, e) => MenuFileNew_Click(s, e);
+        toolBar.OpenSession += (s, e) => MenuFileOpen_Click(s, e);
+        toolBar.SaveSession += (s, e) => MenuFileSave_Click(s, e);
+        toolBar.ShowDashboard += (s, e) => MenuViewDashboard_Click(s, e);
+        toolBar.ShowGraphs += (s, e) => MenuViewGraphs_Click(s, e);
+        toolBar.OpenCalibration += (s, e) => MenuToolsCalibration_Click(s, e);
+        toolBar.StartAllAcquisition += (s, e) => ToolbarStartAll_Click(s, e);
+        toolBar.StopAllAcquisition += (s, e) => ToolbarStopAll_Click(s, e);
+
+        // Wire up Dashboard events
+        dashboardControl.PressureStartRequested += (s, e) => BtnStart_Click(s, new RoutedEventArgs());
+        dashboardControl.PressureStopRequested += (s, e) => BtnStop_Click(s, new RoutedEventArgs());
+        dashboardControl.TemperatureStartRequested += (s, e) => BtnStartTemp_Click(s, new RoutedEventArgs());
+        dashboardControl.TemperatureStopRequested += (s, e) => BtnStopTemp_Click(s, new RoutedEventArgs());
+        dashboardControl.ValveToggleRequested += (s, valveId) => HandleValveToggle(valveId);
+
+        // Wire up Data Table events
+        dataTableControl.ExportToCsvRequested += (s, e) => MenuExportCsv_Click(s, e);
+        dataTableControl.ClearDataRequested += (s, e) => MenuEditClear_Click(s, e);
+
+        // Wire up Calibrations events
+        calibrationsControl.NewCalibrationRequested += (s, e) => MenuToolsCalibration_Click(s, e);
+        calibrationsControl.LoadCalibrationRequested += (s, e) => BtnLoadCalibration_Click(s, e);
+        calibrationsControl.SaveCalibrationRequested += (s, e) => BtnSaveCalibration_Click(s, e);
+
+        // Wire up CSV Logging events
+        csvLoggingControl.BrowseRequested += (s, e) => BtnBrowse_Click(s, e);
+        csvLoggingControl.StartLoggingRequested += (s, e) => BtnStartLogging_Click(s, e);
+        csvLoggingControl.StopLoggingRequested += (s, e) => BtnStopLogging_Click(s, e);
+
         // Set up UI
-        lstRecentSamples.ItemsSource = _recentSamples;
+        dataTableControl.SetDataSource(_recentSamples);
         
         // Set default log file path
         string defaultPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
             AppConfiguration.DefaultLogFileName);
-        txtLogFilePath.Text = defaultPath;
+        csvLoggingControl.LogFilePath = defaultPath;
 
         UpdateStatus("Ready - Lab Data Acquisition System");
     }
@@ -69,26 +122,26 @@ public partial class MainWindow : Window
     /// <summary>
     /// Start DAQ acquisition
     /// </summary>
-    private void BtnStart_Click(object sender, RoutedEventArgs e)
+    private void BtnStart_Click(object? sender, RoutedEventArgs e)
     {
         try
         {
             // Validate inputs
-            if (string.IsNullOrWhiteSpace(txtDeviceChannel.Text))
+            if (string.IsNullOrWhiteSpace(dashboardControl.DeviceChannel))
             {
                 MessageBox.Show("Please enter a device/channel (e.g., Dev1/ai0)", 
                     "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (!int.TryParse(txtSampleRate.Text, out int sampleRate) || sampleRate <= 0)
+            if (!int.TryParse(dashboardControl.SampleRate, out int sampleRate) || sampleRate <= 0)
             {
                 MessageBox.Show("Please enter a valid sample rate (positive integer)", 
                     "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (!int.TryParse(txtSamplesPerRead.Text, out int samplesPerRead) || samplesPerRead <= 0)
+            if (!int.TryParse(dashboardControl.SamplesPerRead, out int samplesPerRead) || samplesPerRead <= 0)
             {
                 MessageBox.Show("Please enter a valid samples per read (positive integer)", 
                     "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -100,16 +153,12 @@ public partial class MainWindow : Window
             _sampleCount = 0;
 
             // Start acquisition
-            _daqManager.Start(txtDeviceChannel.Text, sampleRate, samplesPerRead);
+            _daqManager.Start(dashboardControl.DeviceChannel, sampleRate, samplesPerRead);
 
             // Update UI
-            btnStart.IsEnabled = false;
-            btnStop.IsEnabled = true;
-            txtDeviceChannel.IsEnabled = false;
-            txtSampleRate.IsEnabled = false;
-            txtSamplesPerRead.IsEnabled = false;
+            dashboardControl.SetPressureAcquisitionRunning(true);
 
-            UpdateStatus($"Acquisition started - {txtDeviceChannel.Text} @ {sampleRate} Hz");
+            UpdateStatus($"Acquisition started - {dashboardControl.DeviceChannel} @ {sampleRate} Hz");
         }
         catch (Exception ex)
         {
@@ -122,18 +171,14 @@ public partial class MainWindow : Window
     /// <summary>
     /// Stop DAQ acquisition
     /// </summary>
-    private void BtnStop_Click(object sender, RoutedEventArgs e)
+    private void BtnStop_Click(object? sender, RoutedEventArgs e)
     {
         try
         {
             _daqManager.Stop();
 
             // Update UI
-            btnStart.IsEnabled = true;
-            btnStop.IsEnabled = false;
-            txtDeviceChannel.IsEnabled = true;
-            txtSampleRate.IsEnabled = true;
-            txtSamplesPerRead.IsEnabled = true;
+            dashboardControl.SetPressureAcquisitionRunning(false);
 
             UpdateStatus($"Acquisition stopped - Total samples: {_sampleCount}");
         }
@@ -147,7 +192,7 @@ public partial class MainWindow : Window
     /// <summary>
     /// Browse for log file location
     /// </summary>
-    private void BtnBrowse_Click(object sender, RoutedEventArgs e)
+    private void BtnBrowse_Click(object? sender, EventArgs e)
     {
         var saveDialog = new SaveFileDialog
         {
@@ -159,32 +204,30 @@ public partial class MainWindow : Window
 
         if (saveDialog.ShowDialog() == true)
         {
-            txtLogFilePath.Text = saveDialog.FileName;
+            csvLoggingControl.LogFilePath = saveDialog.FileName;
         }
     }
 
     /// <summary>
     /// Start CSV logging
     /// </summary>
-    private void BtnStartLogging_Click(object sender, RoutedEventArgs e)
+    private void BtnStartLogging_Click(object? sender, EventArgs e)
     {
         try
         {
-            if (string.IsNullOrWhiteSpace(txtLogFilePath.Text))
+            if (string.IsNullOrWhiteSpace(csvLoggingControl.LogFilePath))
             {
                 MessageBox.Show("Please select a log file path", 
                     "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            _csvLogger.StartLogging(txtLogFilePath.Text);
+            _csvLogger.StartLogging(csvLoggingControl.LogFilePath);
 
             // Update UI
-            btnStartLogging.IsEnabled = false;
-            btnStopLogging.IsEnabled = true;
-            btnBrowse.IsEnabled = false;
+            csvLoggingControl.SetLoggingState(true);
 
-            UpdateStatus($"Logging started - {txtLogFilePath.Text}");
+            UpdateStatus($"Logging started - {csvLoggingControl.LogFilePath}");
         }
         catch (Exception ex)
         {
@@ -196,16 +239,14 @@ public partial class MainWindow : Window
     /// <summary>
     /// Stop CSV logging
     /// </summary>
-    private void BtnStopLogging_Click(object sender, RoutedEventArgs e)
+    private void BtnStopLogging_Click(object? sender, EventArgs e)
     {
         try
         {
             _csvLogger.StopLogging();
 
             // Update UI
-            btnStartLogging.IsEnabled = true;
-            btnStopLogging.IsEnabled = false;
-            btnBrowse.IsEnabled = true;
+            csvLoggingControl.SetLoggingState(false);
 
             UpdateStatus("Logging stopped");
         }
@@ -224,8 +265,8 @@ public partial class MainWindow : Window
         // Marshal to UI thread
         Dispatcher.Invoke(() =>
         {
-            // Update latest value
-            txtLatestValue.Text = $"{sample.Value:F6} V";
+            // Update latest value in dashboard
+            dashboardControl.UpdateLatestPressureValue($"{sample.Value:F6} V");
 
             // Add to recent samples list (keep last N samples)
             _recentSamples.Insert(0, sample.ToString());
@@ -305,7 +346,7 @@ public partial class MainWindow : Window
 
     // ============= Menu Handlers =============
 
-    private void MenuFileNew_Click(object sender, RoutedEventArgs e)
+    private void MenuFileNew_Click(object? sender, EventArgs e)
     {
         if (MessageBox.Show("Create new session? This will clear all current data.", "New Session", 
             MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
@@ -317,7 +358,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private void MenuFileOpen_Click(object sender, RoutedEventArgs e)
+    private void MenuFileOpen_Click(object? sender, EventArgs e)
     {
         var openDialog = new OpenFileDialog
         {
@@ -340,13 +381,13 @@ public partial class MainWindow : Window
         }
     }
 
-    private void MenuFileSave_Click(object sender, RoutedEventArgs e)
+    private void MenuFileSave_Click(object? sender, EventArgs e)
     {
         // TODO: Implement session save
         UpdateStatus("Session saved");
     }
 
-    private void MenuFileSaveAs_Click(object sender, RoutedEventArgs e)
+    private void MenuFileSaveAs_Click(object? sender, EventArgs e)
     {
         var saveDialog = new SaveFileDialog
         {
@@ -370,7 +411,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private void MenuExportCsv_Click(object sender, RoutedEventArgs e)
+    private void MenuExportCsv_Click(object? sender, EventArgs e)
     {
         var saveDialog = new SaveFileDialog
         {
@@ -396,13 +437,13 @@ public partial class MainWindow : Window
         }
     }
 
-    private void MenuExportExcel_Click(object sender, RoutedEventArgs e)
+    private void MenuExportExcel_Click(object? sender, EventArgs e)
     {
         MessageBox.Show("Excel export functionality will be available in a future update.", 
             "Feature Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
-    private void MenuExportJson_Click(object sender, RoutedEventArgs e)
+    private void MenuExportJson_Click(object? sender, EventArgs e)
     {
         var saveDialog = new SaveFileDialog
         {
@@ -429,18 +470,18 @@ public partial class MainWindow : Window
         }
     }
 
-    private void MenuFileExit_Click(object sender, RoutedEventArgs e)
+    private void MenuFileExit_Click(object? sender, EventArgs e)
     {
         Close();
     }
 
-    private void MenuEditConfig_Click(object sender, RoutedEventArgs e)
+    private void MenuEditConfig_Click(object? sender, EventArgs e)
     {
         mainTabControl.SelectedItem = tabDashboard;
         UpdateStatus("Showing configuration");
     }
 
-    private void MenuEditClear_Click(object sender, RoutedEventArgs e)
+    private void MenuEditClear_Click(object? sender, EventArgs e)
     {
         if (MessageBox.Show("Clear all data?", "Confirm Clear", 
             MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
@@ -451,54 +492,54 @@ public partial class MainWindow : Window
         }
     }
 
-    private void MenuViewDashboard_Click(object sender, RoutedEventArgs e)
+    private void MenuViewDashboard_Click(object? sender, EventArgs e)
     {
         mainTabControl.SelectedItem = tabDashboard;
     }
 
-    private void MenuViewGraphs_Click(object sender, RoutedEventArgs e)
+    private void MenuViewGraphs_Click(object? sender, EventArgs e)
     {
         mainTabControl.SelectedItem = tabGraphs;
     }
 
-    private void MenuViewDataTable_Click(object sender, RoutedEventArgs e)
+    private void MenuViewDataTable_Click(object? sender, EventArgs e)
     {
         mainTabControl.SelectedItem = tabDataTable;
     }
 
-    private void MenuViewCalibrations_Click(object sender, RoutedEventArgs e)
+    private void MenuViewCalibrations_Click(object? sender, EventArgs e)
     {
         mainTabControl.SelectedItem = tabCalibrations;
     }
 
-    private void MenuToolsDeviceConfig_Click(object sender, RoutedEventArgs e)
+    private void MenuToolsDeviceConfig_Click(object? sender, EventArgs e)
     {
         MessageBox.Show("Device configuration window will open here.\n\n" +
             "Configure:\n• NI-DAQmx devices\n• Thermocouple channels\n• Valve assignments", 
             "Device Configuration", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
-    private void MenuToolsCalibration_Click(object sender, RoutedEventArgs e)
+    private void MenuToolsCalibration_Click(object? sender, EventArgs e)
     {
         MessageBox.Show("Calibration wizard will open here.\n\n" +
             "Steps:\n1. Select sensor\n2. Apply known reference values\n3. Calculate calibration coefficients\n4. Save calibration", 
             "Calibration Wizard", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
-    private void MenuToolsValves_Click(object sender, RoutedEventArgs e)
+    private void MenuToolsValves_Click(object? sender, EventArgs e)
     {
         mainTabControl.SelectedItem = tabDashboard;
         UpdateStatus("Showing valve controls");
     }
 
-    private void MenuToolsSettings_Click(object sender, RoutedEventArgs e)
+    private void MenuToolsSettings_Click(object? sender, EventArgs e)
     {
         MessageBox.Show("Application settings window will open here.\n\n" +
             "Configure:\n• Default sample rates\n• Display preferences\n• File paths\n• Units", 
             "Settings", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
-    private void MenuHelpGuide_Click(object sender, RoutedEventArgs e)
+    private void MenuHelpGuide_Click(object? sender, EventArgs e)
     {
         MessageBox.Show("Lab Data Acquisition System - User Guide\n\n" +
             "Features:\n" +
@@ -512,7 +553,7 @@ public partial class MainWindow : Window
             "User Guide", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
-    private void MenuHelpAbout_Click(object sender, RoutedEventArgs e)
+    private void MenuHelpAbout_Click(object? sender, EventArgs e)
     {
         MessageBox.Show("Lab Data Acquisition System\n" +
             "Version 2.0\n\n" +
@@ -530,61 +571,51 @@ public partial class MainWindow : Window
 
     // ============= Toolbar Handlers =============
 
-    private void ToolbarStartAll_Click(object sender, RoutedEventArgs e)
+    private void ToolbarStartAll_Click(object? sender, EventArgs e)
     {
-        BtnStart_Click(sender, e);
-        BtnStartTemp_Click(sender, e);
+        BtnStart_Click(sender, new RoutedEventArgs());
+        BtnStartTemp_Click(sender, new RoutedEventArgs());
     }
 
-    private void ToolbarStopAll_Click(object sender, RoutedEventArgs e)
+    private void ToolbarStopAll_Click(object? sender, EventArgs e)
     {
-        BtnStop_Click(sender, e);
-        BtnStopTemp_Click(sender, e);
+        BtnStop_Click(sender, new RoutedEventArgs());
+        BtnStopTemp_Click(sender, new RoutedEventArgs());
     }
 
     // ============= Tab Control Handler =============
 
     private void MainTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        string activeView = "";
         if (mainTabControl.SelectedItem == tabDashboard)
         {
-            menuViewDashboard.IsChecked = true;
-            menuViewGraphs.IsChecked = false;
-            menuViewDataTable.IsChecked = false;
-            menuViewCalibrations.IsChecked = false;
+            activeView = "Dashboard";
         }
         else if (mainTabControl.SelectedItem == tabGraphs)
         {
-            menuViewDashboard.IsChecked = false;
-            menuViewGraphs.IsChecked = true;
-            menuViewDataTable.IsChecked = false;
-            menuViewCalibrations.IsChecked = false;
+            activeView = "Graphs";
         }
         else if (mainTabControl.SelectedItem == tabDataTable)
         {
-            menuViewDashboard.IsChecked = false;
-            menuViewGraphs.IsChecked = false;
-            menuViewDataTable.IsChecked = true;
-            menuViewCalibrations.IsChecked = false;
+            activeView = "DataTable";
         }
         else if (mainTabControl.SelectedItem == tabCalibrations)
         {
-            menuViewDashboard.IsChecked = false;
-            menuViewGraphs.IsChecked = false;
-            menuViewDataTable.IsChecked = false;
-            menuViewCalibrations.IsChecked = true;
+            activeView = "Calibrations";
         }
+        
+        menuBar.UpdateViewCheckmarks(activeView);
     }
 
     // ============= Temperature Control Handlers =============
 
-    private void BtnStartTemp_Click(object sender, RoutedEventArgs e)
+    private void BtnStartTemp_Click(object? sender, RoutedEventArgs e)
     {
         if (_temperatureAcquisitionRunning) return;
 
         _temperatureAcquisitionRunning = true;
-        btnStartTemp.IsEnabled = false;
-        btnStopTemp.IsEnabled = true;
+        dashboardControl.SetTemperatureAcquisitionRunning(true);
 
         // Simulate temperature acquisition with a timer
         _temperatureTimer = new System.Threading.Timer(_ =>
@@ -595,7 +626,7 @@ public partial class MainWindow : Window
         UpdateStatus("Temperature acquisition started");
     }
 
-    private void BtnStopTemp_Click(object sender, RoutedEventArgs e)
+    private void BtnStopTemp_Click(object? sender, RoutedEventArgs e)
     {
         if (!_temperatureAcquisitionRunning) return;
 
@@ -605,8 +636,7 @@ public partial class MainWindow : Window
 
         Dispatcher.Invoke(() =>
         {
-            btnStartTemp.IsEnabled = true;
-            btnStopTemp.IsEnabled = false;
+            dashboardControl.SetTemperatureAcquisitionRunning(false);
         });
 
         UpdateStatus("Temperature acquisition stopped");
@@ -619,37 +649,32 @@ public partial class MainWindow : Window
 
         Dispatcher.Invoke(() =>
         {
-            txtTemp1.Text = $"{baseTemp + random.NextDouble() * 10:F1}°C";
-            txtTemp2.Text = $"{baseTemp + 5 + random.NextDouble() * 10:F1}°C";
-            txtTemp3.Text = $"{baseTemp + 10 + random.NextDouble() * 10:F1}°C";
-            txtTemp4.Text = $"{baseTemp + 15 + random.NextDouble() * 10:F1}°C";
+            dashboardControl.UpdateTemperatureValues(
+                $"{baseTemp + random.NextDouble() * 10:F1}°C",
+                $"{baseTemp + 5 + random.NextDouble() * 10:F1}°C",
+                $"{baseTemp + 10 + random.NextDouble() * 10:F1}°C",
+                $"{baseTemp + 15 + random.NextDouble() * 10:F1}°C"
+            );
         });
     }
 
     // ============= Valve Control Handlers =============
 
-    private void BtnValve_Click(object sender, RoutedEventArgs e)
+    private void HandleValveToggle(int valveId)
     {
-        if (sender is Button btn && btn.Tag is string valveIdStr)
-        {
-            int valveId = int.Parse(valveIdStr);
-            var valve = _valves[valveId - 1];
-            
-            valve.IsOpen = !valve.IsOpen;
-            valve.LastChanged = DateTime.Now;
+        var valve = _valves[valveId - 1];
+        
+        valve.IsOpen = !valve.IsOpen;
+        valve.LastChanged = DateTime.Now;
 
-            btn.Content = valve.Status;
-            btn.Background = valve.IsOpen ? 
-                new SolidColorBrush(Color.FromRgb(76, 175, 80)) : // Green
-                new SolidColorBrush(Color.FromRgb(204, 204, 204)); // Gray
+        dashboardControl.UpdateValveState(valveId, valve);
 
-            UpdateStatus($"Valve {valveId} {valve.Status}");
-        }
+        UpdateStatus($"Valve {valveId} {valve.Status}");
     }
 
     // ============= Calibration Handlers =============
 
-    private void BtnLoadCalibration_Click(object sender, RoutedEventArgs e)
+    private void BtnLoadCalibration_Click(object? sender, EventArgs e)
     {
         var openDialog = new OpenFileDialog
         {
@@ -672,7 +697,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private void BtnSaveCalibration_Click(object sender, RoutedEventArgs e)
+    private void BtnSaveCalibration_Click(object? sender, EventArgs e)
     {
         var saveDialog = new SaveFileDialog
         {

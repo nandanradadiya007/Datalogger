@@ -1,0 +1,31 @@
+<UserControl x:Class="PressureDataLogger.Views.GraphsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <GroupBox Grid.Row="0" Header="Pressure vs Time" Margin="0,0,0,10">
+            <Grid>
+                <TextBlock Text="Real-time pressure graph will be displayed here" 
+                           HorizontalAlignment="Center" VerticalAlignment="Center" 
+                           FontStyle="Italic" Foreground="Gray"/>
+                <!-- Placeholder for charting control -->
+            </Grid>
+        </GroupBox>
+
+        <GroupBox Grid.Row="1" Header="Temperature vs Time">
+            <Grid>
+                <TextBlock Text="Real-time temperature graph will be displayed here" 
+                           HorizontalAlignment="Center" VerticalAlignment="Center" 
+                           FontStyle="Italic" Foreground="Gray"/>
+                <!-- Placeholder for charting control -->
+            </Grid>
+        </GroupBox>
+    </Grid>
+</UserControl>
