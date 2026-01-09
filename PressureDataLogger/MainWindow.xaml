@@ -5,8 +5,65 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PressureDataLogger"
         mc:Ignorable="d"
-        Title="Pressure Data Logger - NI-DAQmx" Height="600" Width="900"
+        Title="Lab Data Acquisition System - Multi-Sensor Logger" Height="700" Width="1100"
         Closing="Window_Closing">
+    <DockPanel>
+        <!-- Menu Bar -->
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_New Session" Click="MenuFileNew_Click"/>
+                <MenuItem Header="_Open Session..." Click="MenuFileOpen_Click"/>
+                <MenuItem Header="_Save Session" Click="MenuFileSave_Click"/>
+                <MenuItem Header="Save Session _As..." Click="MenuFileSaveAs_Click"/>
+                <Separator/>
+                <MenuItem Header="_Export Data...">
+                    <MenuItem Header="Export to _CSV..." Click="MenuExportCsv_Click"/>
+                    <MenuItem Header="Export to _Excel..." Click="MenuExportExcel_Click"/>
+                    <MenuItem Header="Export to _JSON..." Click="MenuExportJson_Click"/>
+                </MenuItem>
+                <Separator/>
+                <MenuItem Header="E_xit" Click="MenuFileExit_Click"/>
+            </MenuItem>
+            <MenuItem Header="_Edit">
+                <MenuItem Header="_Configuration..." Click="MenuEditConfig_Click"/>
+                <MenuItem Header="_Clear Data" Click="MenuEditClear_Click"/>
+            </MenuItem>
+            <MenuItem Header="_View">
+                <MenuItem Header="_Dashboard" x:Name="menuViewDashboard" IsCheckable="True" IsChecked="True" Click="MenuViewDashboard_Click"/>
+                <MenuItem Header="_Graphs" x:Name="menuViewGraphs" IsCheckable="True" Click="MenuViewGraphs_Click"/>
+                <MenuItem Header="_Data Table" x:Name="menuViewDataTable" IsCheckable="True" Click="MenuViewDataTable_Click"/>
+                <MenuItem Header="_Calibrations" x:Name="menuViewCalibrations" IsCheckable="True" Click="MenuViewCalibrations_Click"/>
+                <Separator/>
+                <MenuItem Header="Show _Toolbar" IsCheckable="True" IsChecked="True"/>
+                <MenuItem Header="Show _Status Bar" IsCheckable="True" IsChecked="True"/>
+            </MenuItem>
+            <MenuItem Header="_Tools">
+                <MenuItem Header="_Device Configuration..." Click="MenuToolsDeviceConfig_Click"/>
+                <MenuItem Header="_Calibration Wizard..." Click="MenuToolsCalibration_Click"/>
+                <MenuItem Header="_Valve Controls..." Click="MenuToolsValves_Click"/>
+                <Separator/>
+                <MenuItem Header="_Settings..." Click="MenuToolsSettings_Click"/>
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_User Guide" Click="MenuHelpGuide_Click"/>
+                <MenuItem Header="_About..." Click="MenuHelpAbout_Click"/>
+            </MenuItem>
+        </Menu>
+
+        <!-- Toolbar -->
+        <ToolBar DockPanel.Dock="Top" x:Name="mainToolbar">
+            <Button Content="New" Click="MenuFileNew_Click" ToolTip="New Session"/>
+            <Button Content="Open" Click="MenuFileOpen_Click" ToolTip="Open Session"/>
+            <Button Content="Save" Click="MenuFileSave_Click" ToolTip="Save Session"/>
+            <Separator/>
+            <Button Content="Dashboard" Click="MenuViewDashboard_Click" ToolTip="Show Dashboard"/>
+            <Button Content="Graphs" Click="MenuViewGraphs_Click" ToolTip="Show Graphs"/>
+            <Button Content="Calibration" Click="MenuToolsCalibration_Click" ToolTip="Open Calibration"/>
+            <Separator/>
+            <Button Content="Start Acquisition" Click="ToolbarStartAll_Click" Background="#FF4CAF50" Foreground="White" Padding="10,5" FontWeight="Bold"/>
+            <Button Content="Stop Acquisition" Click="ToolbarStopAll_Click" Background="#FFF44336" Foreground="White" Padding="10,5" FontWeight="Bold"/>
+        </ToolBar>
+
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -17,114 +74,193 @@
         </Grid.RowDefinitions>
 
         <!-- Title -->
-        <TextBlock Grid.Row="0" Text="NI-DAQmx Pressure Data Logger" 
+        <TextBlock Grid.Row="0" Text="Lab Data Acquisition System" 
                    FontSize="20" FontWeight="Bold" Margin="0,0,0,15"/>
 
-        <!-- Configuration Panel -->
-        <GroupBox Grid.Row="1" Header="DAQ Configuration" Margin="0,0,0,10">
-            <Grid Margin="10">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+        <!-- Main Content Area with Tabs -->
+        <TabControl Grid.Row="1" Grid.RowSpan="3" x:Name="mainTabControl" SelectionChanged="MainTabControl_SelectionChanged">
+            <!-- Dashboard Tab -->
+            <TabItem Header="Dashboard" x:Name="tabDashboard">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <Grid Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
 
-                <!-- Device/Channel -->
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="Device/Channel:" 
-                           VerticalAlignment="Center" Margin="0,5"/>
-                <TextBox Grid.Row="0" Grid.Column="1" x:Name="txtDeviceChannel" 
-                         Text="Dev1/ai0" VerticalAlignment="Center" Margin="5" Padding="5"/>
+                        <!-- Pressure Section -->
+                        <GroupBox Grid.Row="0" Header="Pressure Transducers" Margin="0,0,0,10">
+                            <Grid Margin="10">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
 
-                <!-- Sample Rate -->
-                <TextBlock Grid.Row="0" Grid.Column="2" Text="Sample Rate (Hz):" 
-                           VerticalAlignment="Center" Margin="10,5,0,5"/>
-                <TextBox Grid.Row="0" Grid.Column="3" x:Name="txtSampleRate" 
-                         Text="1000" VerticalAlignment="Center" Margin="5" Padding="5"/>
+                                <!-- Pressure Configuration -->
+                                <Grid Grid.Row="0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
 
-                <!-- Samples Per Read -->
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="Samples Per Read:" 
-                           VerticalAlignment="Center" Margin="0,5"/>
-                <TextBox Grid.Row="1" Grid.Column="1" x:Name="txtSamplesPerRead" 
-                         Text="100" VerticalAlignment="Center" Margin="5" Padding="5"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Device/Channel:" VerticalAlignment="Center" Margin="0,5"/>
+                                    <TextBox Grid.Row="0" Grid.Column="1" x:Name="txtDeviceChannel" Text="Dev1/ai0" VerticalAlignment="Center" Margin="5" Padding="5"/>
 
-                <!-- Control Buttons -->
-                <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" 
-                            Orientation="Horizontal" Margin="0,10,0,0">
-                    <Button x:Name="btnStart" Content="Start Acquisition" 
-                            Width="120" Height="30" Margin="0,0,10,0" 
-                            Click="BtnStart_Click" Background="#FF4CAF50" Foreground="White"/>
-                    <Button x:Name="btnStop" Content="Stop Acquisition" 
-                            Width="120" Height="30" Margin="0,0,10,0" 
-                            Click="BtnStop_Click" IsEnabled="False" Background="#FFF44336" Foreground="White"/>
-                </StackPanel>
-            </Grid>
-        </GroupBox>
+                                    <TextBlock Grid.Row="0" Grid.Column="2" Text="Sample Rate (Hz):" VerticalAlignment="Center" Margin="10,5,0,5"/>
+                                    <TextBox Grid.Row="0" Grid.Column="3" x:Name="txtSampleRate" Text="1000" VerticalAlignment="Center" Margin="5" Padding="5"/>
 
-        <!-- Logging Panel -->
-        <GroupBox Grid.Row="2" Header="CSV Logging" Margin="0,0,0,10">
-            <Grid Margin="10">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Samples Per Read:" VerticalAlignment="Center" Margin="0,5"/>
+                                    <TextBox Grid.Row="1" Grid.Column="1" x:Name="txtSamplesPerRead" Text="100" VerticalAlignment="Center" Margin="5" Padding="5"/>
+                                </Grid>
 
-                <!-- Log File Path -->
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="Log File Path:" 
-                           VerticalAlignment="Center" Margin="0,5"/>
-                <TextBox Grid.Row="0" Grid.Column="1" x:Name="txtLogFilePath" 
-                         Text="" IsReadOnly="True" VerticalAlignment="Center" 
-                         Margin="5" Padding="5" Background="#FFF5F5F5"/>
-                <Button Grid.Row="0" Grid.Column="2" x:Name="btnBrowse" 
-                        Content="Browse..." Width="80" Height="25" 
-                        Margin="5" Click="BtnBrowse_Click"/>
+                                <!-- Pressure Controls and Display -->
+                                <Grid Grid.Row="1" Margin="0,10,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
 
-                <!-- Logging Control -->
-                <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" 
-                            Orientation="Horizontal" Margin="0,10,0,0">
-                    <Button x:Name="btnStartLogging" Content="Start Logging" 
-                            Width="120" Height="30" Margin="0,0,10,0" 
-                            Click="BtnStartLogging_Click" Background="#FF2196F3" Foreground="White"/>
-                    <Button x:Name="btnStopLogging" Content="Stop Logging" 
-                            Width="120" Height="30" 
-                            Click="BtnStopLogging_Click" IsEnabled="False" Background="#FFFF9800" Foreground="White"/>
-                </StackPanel>
-            </Grid>
-        </GroupBox>
+                                    <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,20,0">
+                                        <Button x:Name="btnStart" Content="Start" Width="100" Height="30" Margin="0,0,10,0" 
+                                                Click="BtnStart_Click" Background="#FF4CAF50" Foreground="White"/>
+                                        <Button x:Name="btnStop" Content="Stop" Width="100" Height="30" 
+                                                Click="BtnStop_Click" IsEnabled="False" Background="#FFF44336" Foreground="White"/>
+                                    </StackPanel>
 
-        <!-- Data Display Panel -->
-        <GroupBox Grid.Row="3" Header="Data Display" Margin="0,0,0,10">
-            <Grid Margin="10">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+                                    <Border Grid.Column="1" BorderBrush="#FF2196F3" BorderThickness="2" Background="#FFF0F8FF" Padding="10">
+                                        <StackPanel>
+                                            <TextBlock Text="Latest Pressure:" FontWeight="Bold" FontSize="12"/>
+                                            <TextBlock x:Name="txtLatestValue" Text="-- V" FontSize="20" FontWeight="Bold" Foreground="#FF2196F3"/>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </Grid>
+                        </GroupBox>
 
-                <!-- Latest Value -->
-                <Border Grid.Row="0" BorderBrush="#FF2196F3" BorderThickness="2" 
-                        Background="#FFF0F8FF" Padding="10" Margin="0,0,0,10">
-                    <StackPanel>
-                        <TextBlock Text="Latest Value:" FontWeight="Bold" FontSize="14"/>
-                        <TextBlock x:Name="txtLatestValue" Text="-- V" 
-                                   FontSize="24" FontWeight="Bold" 
-                                   Foreground="#FF2196F3" Margin="0,5,0,0"/>
+                        <!-- Temperature Section -->
+                        <GroupBox Grid.Row="1" Header="Thermocouples" Margin="0,0,0,10">
+                            <Grid Margin="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,20,0">
+                                    <Button x:Name="btnStartTemp" Content="Start" Width="100" Height="30" Margin="0,0,10,0" 
+                                            Click="BtnStartTemp_Click" Background="#FF4CAF50" Foreground="White"/>
+                                    <Button x:Name="btnStopTemp" Content="Stop" Width="100" Height="30" 
+                                            Click="BtnStopTemp_Click" IsEnabled="False" Background="#FFF44336" Foreground="White"/>
+                                </StackPanel>
+
+                                <UniformGrid Grid.Column="1" Columns="4" Rows="2">
+                                    <Border BorderBrush="#FFFF9800" BorderThickness="2" Background="#FFFFF8E1" Padding="10" Margin="5">
+                                        <StackPanel>
+                                            <TextBlock Text="TC1:" FontWeight="Bold" FontSize="10"/>
+                                            <TextBlock x:Name="txtTemp1" Text="--°C" FontSize="16" Foreground="#FFFF9800"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border BorderBrush="#FFFF9800" BorderThickness="2" Background="#FFFFF8E1" Padding="10" Margin="5">
+                                        <StackPanel>
+                                            <TextBlock Text="TC2:" FontWeight="Bold" FontSize="10"/>
+                                            <TextBlock x:Name="txtTemp2" Text="--°C" FontSize="16" Foreground="#FFFF9800"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border BorderBrush="#FFFF9800" BorderThickness="2" Background="#FFFFF8E1" Padding="10" Margin="5">
+                                        <StackPanel>
+                                            <TextBlock Text="TC3:" FontWeight="Bold" FontSize="10"/>
+                                            <TextBlock x:Name="txtTemp3" Text="--°C" FontSize="16" Foreground="#FFFF9800"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border BorderBrush="#FFFF9800" BorderThickness="2" Background="#FFFFF8E1" Padding="10" Margin="5">
+                                        <StackPanel>
+                                            <TextBlock Text="TC4:" FontWeight="Bold" FontSize="10"/>
+                                            <TextBlock x:Name="txtTemp4" Text="--°C" FontSize="16" Foreground="#FFFF9800"/>
+                                        </StackPanel>
+                                    </Border>
+                                </UniformGrid>
+                            </Grid>
+                        </GroupBox>
+
+                        <!-- Valve Controls Section -->
+                        <GroupBox Grid.Row="2" Header="Valve Controls">
+                            <Grid Margin="10">
+                                <UniformGrid Columns="4" Rows="1">
+                                    <StackPanel Margin="5">
+                                        <TextBlock Text="Valve 1" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                        <Button x:Name="btnValve1" Content="CLOSED" Width="100" Height="40" Margin="0,5,0,0"
+                                                Background="#FFCCCCCC" Click="BtnValve_Click" Tag="1"/>
+                                    </StackPanel>
+                                    <StackPanel Margin="5">
+                                        <TextBlock Text="Valve 2" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                        <Button x:Name="btnValve2" Content="CLOSED" Width="100" Height="40" Margin="0,5,0,0"
+                                                Background="#FFCCCCCC" Click="BtnValve_Click" Tag="2"/>
+                                    </StackPanel>
+                                    <StackPanel Margin="5">
+                                        <TextBlock Text="Valve 3" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                        <Button x:Name="btnValve3" Content="CLOSED" Width="100" Height="40" Margin="0,5,0,0"
+                                                Background="#FFCCCCCC" Click="BtnValve_Click" Tag="3"/>
+                                    </StackPanel>
+                                    <StackPanel Margin="5">
+                                        <TextBlock Text="Valve 4" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                        <Button x:Name="btnValve4" Content="CLOSED" Width="100" Height="40" Margin="0,5,0,0"
+                                                Background="#FFCCCCCC" Click="BtnValve_Click" Tag="4"/>
+                                    </StackPanel>
+                                </UniformGrid>
+                            </Grid>
+                        </GroupBox>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Graphs Tab -->
+            <TabItem Header="Graphs" x:Name="tabGraphs">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <GroupBox Grid.Row="0" Header="Pressure vs Time" Margin="0,0,0,10">
+                        <Grid>
+                            <TextBlock Text="Real-time pressure graph will be displayed here" 
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                       FontStyle="Italic" Foreground="Gray"/>
+                            <!-- Placeholder for charting control -->
+                        </Grid>
+                    </GroupBox>
+
+                    <GroupBox Grid.Row="1" Header="Temperature vs Time">
+                        <Grid>
+                            <TextBlock Text="Real-time temperature graph will be displayed here" 
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                       FontStyle="Italic" Foreground="Gray"/>
+                            <!-- Placeholder for charting control -->
+                        </Grid>
+                    </GroupBox>
+                </Grid>
+            </TabItem>
+
+            <!-- Data Table Tab -->
+            <TabItem Header="Data Table" x:Name="tabDataTable">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button Content="Export to CSV" Click="MenuExportCsv_Click" Width="120" Margin="0,0,10,0"/>
+                        <Button Content="Clear Data" Click="MenuEditClear_Click" Width="120"/>
                     </StackPanel>
-                </Border>
 
-                <!-- Recent Samples List -->
-                <Border Grid.Row="1" BorderBrush="#FFCCCCCC" BorderThickness="1">
-                    <ListBox x:Name="lstRecentSamples" 
+                    <ListBox Grid.Row="1" x:Name="lstRecentSamples" 
                              ScrollViewer.VerticalScrollBarVisibility="Auto"
                              Background="White">
                         <ListBox.ItemTemplate>
@@ -133,9 +269,63 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                </Border>
-            </Grid>
-        </GroupBox>
+                </Grid>
+            </TabItem>
+
+            <!-- Calibrations Tab -->
+            <TabItem Header="Calibrations" x:Name="tabCalibrations">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button Content="New Calibration" Click="MenuToolsCalibration_Click" Width="130" Margin="0,0,10,0"/>
+                        <Button Content="Load Calibration" Click="BtnLoadCalibration_Click" Width="130" Margin="0,0,10,0"/>
+                        <Button Content="Save Calibration" Click="BtnSaveCalibration_Click" Width="130"/>
+                    </StackPanel>
+
+                    <GroupBox Grid.Row="1" Header="Active Calibrations">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel x:Name="pnlCalibrations">
+                                <TextBlock Text="No calibrations loaded" FontStyle="Italic" Foreground="Gray" Margin="10"/>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </GroupBox>
+                </Grid>
+            </TabItem>
+
+            <!-- CSV Logging Tab -->
+            <TabItem Header="CSV Logging" x:Name="tabLogging">
+                <GroupBox Header="CSV Logging Configuration" Margin="10">
+                    <Grid Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Log File Path:" VerticalAlignment="Center" Margin="0,5"/>
+                        <TextBox Grid.Row="0" Grid.Column="1" x:Name="txtLogFilePath" Text="" IsReadOnly="True" 
+                                 VerticalAlignment="Center" Margin="5" Padding="5" Background="#FFF5F5F5"/>
+                        <Button Grid.Row="0" Grid.Column="2" x:Name="btnBrowse" Content="Browse..." 
+                                Width="80" Height="25" Margin="5" Click="BtnBrowse_Click"/>
+
+                        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" Margin="0,10,0,0">
+                            <Button x:Name="btnStartLogging" Content="Start Logging" Width="120" Height="30" 
+                                    Margin="0,0,10,0" Click="BtnStartLogging_Click" Background="#FF2196F3" Foreground="White"/>
+                            <Button x:Name="btnStopLogging" Content="Stop Logging" Width="120" Height="30" 
+                                    Click="BtnStopLogging_Click" IsEnabled="False" Background="#FFFF9800" Foreground="White"/>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+            </TabItem>
+        </TabControl>
 
         <!-- Status Bar -->
         <Border Grid.Row="4" BorderBrush="#FFCCCCCC" BorderThickness="0,1,0,0" 
@@ -143,4 +333,5 @@
             <TextBlock x:Name="txtStatus" Text="Ready" FontSize="12"/>
         </Border>
     </Grid>
+    </DockPanel>
 </Window>
