@@ -1,0 +1,47 @@
+<UserControl x:Class="PressureDataLogger.Views.MenuBarControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d">
+    <Menu>
+        <MenuItem Header="_File">
+            <MenuItem Header="_New Session" Click="MenuFileNew_Click"/>
+            <MenuItem Header="_Open Session..." Click="MenuFileOpen_Click"/>
+            <MenuItem Header="_Save Session" Click="MenuFileSave_Click"/>
+            <MenuItem Header="Save Session _As..." Click="MenuFileSaveAs_Click"/>
+            <Separator/>
+            <MenuItem Header="_Export Data...">
+                <MenuItem Header="Export to _CSV..." Click="MenuExportCsv_Click"/>
+                <MenuItem Header="Export to _Excel..." Click="MenuExportExcel_Click"/>
+                <MenuItem Header="Export to _JSON..." Click="MenuExportJson_Click"/>
+            </MenuItem>
+            <Separator/>
+            <MenuItem Header="E_xit" Click="MenuFileExit_Click"/>
+        </MenuItem>
+        <MenuItem Header="_Edit">
+            <MenuItem Header="_Configuration..." Click="MenuEditConfig_Click"/>
+            <MenuItem Header="_Clear Data" Click="MenuEditClear_Click"/>
+        </MenuItem>
+        <MenuItem Header="_View">
+            <MenuItem Header="_Dashboard" x:Name="menuViewDashboard" IsCheckable="True" IsChecked="True" Click="MenuViewDashboard_Click"/>
+            <MenuItem Header="_Graphs" x:Name="menuViewGraphs" IsCheckable="True" Click="MenuViewGraphs_Click"/>
+            <MenuItem Header="_Data Table" x:Name="menuViewDataTable" IsCheckable="True" Click="MenuViewDataTable_Click"/>
+            <MenuItem Header="_Calibrations" x:Name="menuViewCalibrations" IsCheckable="True" Click="MenuViewCalibrations_Click"/>
+            <Separator/>
+            <MenuItem Header="Show _Toolbar" IsCheckable="True" IsChecked="True"/>
+            <MenuItem Header="Show _Status Bar" IsCheckable="True" IsChecked="True"/>
+        </MenuItem>
+        <MenuItem Header="_Tools">
+            <MenuItem Header="_Device Configuration..." Click="MenuToolsDeviceConfig_Click"/>
+            <MenuItem Header="_Calibration Wizard..." Click="MenuToolsCalibration_Click"/>
+            <MenuItem Header="_Valve Controls..." Click="MenuToolsValves_Click"/>
+            <Separator/>
+            <MenuItem Header="_Settings..." Click="MenuToolsSettings_Click"/>
+        </MenuItem>
+        <MenuItem Header="_Help">
+            <MenuItem Header="_User Guide" Click="MenuHelpGuide_Click"/>
+            <MenuItem Header="_About..." Click="MenuHelpAbout_Click"/>
+        </MenuItem>
+    </Menu>
+</UserControl>

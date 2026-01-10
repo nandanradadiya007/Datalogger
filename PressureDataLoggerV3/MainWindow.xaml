@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:PressureDataLogger"
         xmlns:views="clr-namespace:PressureDataLogger.Views"
         mc:Ignorable="d"
-        Title="Lab Data Acquisition System - Multi-Sensor Logger" Height="700" Width="1100"
+        Title="Lab Data Acquisition System V3 - Modular Component Architecture" Height="700" Width="1100"
         Closing="Window_Closing">
     <DockPanel>
         <!-- Menu Bar Component -->
