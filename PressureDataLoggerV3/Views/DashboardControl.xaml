@@ -1,0 +1,143 @@
+<UserControl x:Class="PressureDataLogger.Views.DashboardControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Pressure Section -->
+            <GroupBox Grid.Row="0" Header="Pressure Transducers" Margin="0,0,0,10">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Pressure Configuration -->
+                    <Grid Grid.Row="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Device/Channel:" VerticalAlignment="Center" Margin="0,5"/>
+                        <TextBox Grid.Row="0" Grid.Column="1" x:Name="txtDeviceChannel" Text="Dev1/ai0" VerticalAlignment="Center" Margin="5" Padding="5"/>
+
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Sample Rate (Hz):" VerticalAlignment="Center" Margin="10,5,0,5"/>
+                        <TextBox Grid.Row="0" Grid.Column="3" x:Name="txtSampleRate" Text="1000" VerticalAlignment="Center" Margin="5" Padding="5"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Samples Per Read:" VerticalAlignment="Center" Margin="0,5"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" x:Name="txtSamplesPerRead" Text="100" VerticalAlignment="Center" Margin="5" Padding="5"/>
+                    </Grid>
+
+                    <!-- Pressure Controls and Display -->
+                    <Grid Grid.Row="1" Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,20,0">
+                            <Button x:Name="btnStart" Content="Start" Width="100" Height="30" Margin="0,0,10,0" 
+                                    Click="BtnStart_Click" Background="#FF4CAF50" Foreground="White"/>
+                            <Button x:Name="btnStop" Content="Stop" Width="100" Height="30" 
+                                    Click="BtnStop_Click" IsEnabled="False" Background="#FFF44336" Foreground="White"/>
+                        </StackPanel>
+
+                        <Border Grid.Column="1" BorderBrush="#FF2196F3" BorderThickness="2" Background="#FFF0F8FF" Padding="10">
+                            <StackPanel>
+                                <TextBlock Text="Latest Pressure:" FontWeight="Bold" FontSize="12"/>
+                                <TextBlock x:Name="txtLatestValue" Text="-- V" FontSize="20" FontWeight="Bold" Foreground="#FF2196F3"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </GroupBox>
+
+            <!-- Temperature Section -->
+            <GroupBox Grid.Row="1" Header="Thermocouples" Margin="0,0,0,10">
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,20,0">
+                        <Button x:Name="btnStartTemp" Content="Start" Width="100" Height="30" Margin="0,0,10,0" 
+                                Click="BtnStartTemp_Click" Background="#FF4CAF50" Foreground="White"/>
+                        <Button x:Name="btnStopTemp" Content="Stop" Width="100" Height="30" 
+                                Click="BtnStopTemp_Click" IsEnabled="False" Background="#FFF44336" Foreground="White"/>
+                    </StackPanel>
+
+                    <UniformGrid Grid.Column="1" Columns="4" Rows="2">
+                        <Border BorderBrush="#FFFF9800" BorderThickness="2" Background="#FFFFF8E1" Padding="10" Margin="5">
+                            <StackPanel>
+                                <TextBlock Text="TC1:" FontWeight="Bold" FontSize="10"/>
+                                <TextBlock x:Name="txtTemp1" Text="--°C" FontSize="16" Foreground="#FFFF9800"/>
+                            </StackPanel>
+                        </Border>
+                        <Border BorderBrush="#FFFF9800" BorderThickness="2" Background="#FFFFF8E1" Padding="10" Margin="5">
+                            <StackPanel>
+                                <TextBlock Text="TC2:" FontWeight="Bold" FontSize="10"/>
+                                <TextBlock x:Name="txtTemp2" Text="--°C" FontSize="16" Foreground="#FFFF9800"/>
+                            </StackPanel>
+                        </Border>
+                        <Border BorderBrush="#FFFF9800" BorderThickness="2" Background="#FFFFF8E1" Padding="10" Margin="5">
+                            <StackPanel>
+                                <TextBlock Text="TC3:" FontWeight="Bold" FontSize="10"/>
+                                <TextBlock x:Name="txtTemp3" Text="--°C" FontSize="16" Foreground="#FFFF9800"/>
+                            </StackPanel>
+                        </Border>
+                        <Border BorderBrush="#FFFF9800" BorderThickness="2" Background="#FFFFF8E1" Padding="10" Margin="5">
+                            <StackPanel>
+                                <TextBlock Text="TC4:" FontWeight="Bold" FontSize="10"/>
+                                <TextBlock x:Name="txtTemp4" Text="--°C" FontSize="16" Foreground="#FFFF9800"/>
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+                </Grid>
+            </GroupBox>
+
+            <!-- Valve Controls Section -->
+            <GroupBox Grid.Row="2" Header="Valve Controls">
+                <Grid Margin="10">
+                    <UniformGrid Columns="4" Rows="1">
+                        <StackPanel Margin="5">
+                            <TextBlock Text="Valve 1" FontWeight="Bold" HorizontalAlignment="Center"/>
+                            <Button x:Name="btnValve1" Content="CLOSED" Width="100" Height="40" Margin="0,5,0,0"
+                                    Background="#FFCCCCCC" Click="BtnValve_Click" Tag="1"/>
+                        </StackPanel>
+                        <StackPanel Margin="5">
+                            <TextBlock Text="Valve 2" FontWeight="Bold" HorizontalAlignment="Center"/>
+                            <Button x:Name="btnValve2" Content="CLOSED" Width="100" Height="40" Margin="0,5,0,0"
+                                    Background="#FFCCCCCC" Click="BtnValve_Click" Tag="2"/>
+                        </StackPanel>
+                        <StackPanel Margin="5">
+                            <TextBlock Text="Valve 3" FontWeight="Bold" HorizontalAlignment="Center"/>
+                            <Button x:Name="btnValve3" Content="CLOSED" Width="100" Height="40" Margin="0,5,0,0"
+                                    Background="#FFCCCCCC" Click="BtnValve_Click" Tag="3"/>
+                        </StackPanel>
+                        <StackPanel Margin="5">
+                            <TextBlock Text="Valve 4" FontWeight="Bold" HorizontalAlignment="Center"/>
+                            <Button x:Name="btnValve4" Content="CLOSED" Width="100" Height="40" Margin="0,5,0,0"
+                                    Background="#FFCCCCCC" Click="BtnValve_Click" Tag="4"/>
+                        </StackPanel>
+                    </UniformGrid>
+                </Grid>
+            </GroupBox>
+        </Grid>
+    </ScrollViewer>
+</UserControl>
