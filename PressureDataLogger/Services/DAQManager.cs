@@ -197,6 +197,53 @@ namespace PressureDataLogger.Services
             return data;
         }
 
+        /// <summary>
+        /// Returns all connected NI-DAQmx device names.
+        /// </summary>
+        public IReadOnlyList<string> GetAvailableDevices()
+        {
+            // TODO: Replace with NI-DAQmx enumeration when hardware is available:
+            // return DaqSystem.Local.Devices.ToList();
+
+            // STUB: return simulated device list for testing without hardware
+            return new List<string> { "Dev1", "Dev2" };
+        }
+
+        /// <summary>
+        /// Returns the product type string for a given device.
+        /// </summary>
+        public string GetDeviceType(string deviceName)
+        {
+            // TODO: Replace with NI-DAQmx device property when hardware is available:
+            // return DaqSystem.Local.LoadDevice(deviceName).ProductType;
+
+            // STUB: return simulated device types for testing without hardware
+            return deviceName switch
+            {
+                "Dev1" => "NI USB-6001",
+                "Dev2" => "NI USB-6002",
+                _ => "Unknown Device"
+            };
+        }
+
+        /// <summary>
+        /// Returns the analog-input channel names available on a device.
+        /// </summary>
+        public IReadOnlyList<string> GetDeviceChannels(string deviceName)
+        {
+            // TODO: Replace with NI-DAQmx channel enumeration when hardware is available:
+            // return DaqSystem.Local.LoadDevice(deviceName).AIPhysicalChannels.ToList();
+
+            // STUB: return simulated channels for testing without hardware
+            return new List<string>
+            {
+                $"{deviceName}/ai0",
+                $"{deviceName}/ai1",
+                $"{deviceName}/ai2",
+                $"{deviceName}/ai3"
+            };
+        }
+
         protected virtual void OnDataAcquired(PressureSample sample)
         {
             DataAcquired?.Invoke(this, sample);

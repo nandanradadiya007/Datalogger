@@ -92,6 +92,8 @@ public partial class MainWindow : Window
         dashboardControl.TemperatureStartRequested += (s, e) => BtnStartTemp_Click(s, new RoutedEventArgs());
         dashboardControl.TemperatureStopRequested += (s, e) => BtnStopTemp_Click(s, new RoutedEventArgs());
         dashboardControl.ValveToggleRequested += (s, valveId) => HandleValveToggle(valveId);
+        dashboardControl.DeviceSelectionChanged += (s, deviceName) => OnDeviceSelected(deviceName);
+        dashboardControl.RefreshDevicesRequested += (s, e) => RefreshDeviceList();
 
         // Wire up Data Table events
         dataTableControl.ExportToCsvRequested += (s, e) => MenuExportCsv_Click(s, e);
@@ -115,6 +117,9 @@ public partial class MainWindow : Window
             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
             AppConfiguration.DefaultLogFileName);
         csvLoggingControl.LogFilePath = defaultPath;
+
+        // Populate the device dropdown on startup
+        RefreshDeviceList();
 
         UpdateStatus("Ready - Lab Data Acquisition System");
     }
@@ -718,6 +723,44 @@ public partial class MainWindow : Window
                 MessageBox.Show($"Failed to save calibration: {ex.Message}", "Error", 
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+    }
+
+    // ============= Device Discovery Helpers =============
+
+    /// <summary>
+    /// Re-enumerates connected DAQ devices and loads them into the dashboard dropdown.
+    /// </summary>
+    private void RefreshDeviceList()
+    {
+        try
+        {
+            var devices = _daqManager.GetAvailableDevices();
+            dashboardControl.LoadDevices(devices);
+            UpdateStatus($"Found {devices.Count} device(s)");
+        }
+        catch (Exception ex)
+        {
+            UpdateStatus($"Device enumeration error: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Called when the user selects a device in the dropdown.
+    /// Loads the device type and its analog-input channels.
+    /// </summary>
+    private void OnDeviceSelected(string deviceName)
+    {
+        try
+        {
+            var deviceType = _daqManager.GetDeviceType(deviceName);
+            var channels   = _daqManager.GetDeviceChannels(deviceName);
+            dashboardControl.LoadChannels(channels, deviceType);
+            UpdateStatus($"Device '{deviceName}' selected – {deviceType} – {channels.Count} channel(s)");
+        }
+        catch (Exception ex)
+        {
+            UpdateStatus($"Error loading device info: {ex.Message}");
         }
     }
 }

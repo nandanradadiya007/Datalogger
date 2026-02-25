@@ -34,5 +34,21 @@ namespace PressureDataLogger.Interfaces
         /// Stops data acquisition
         /// </summary>
         void Stop();
+
+        /// <summary>
+        /// Returns the names of all connected NI-DAQmx devices (e.g., "Dev1", "Dev2")
+        /// </summary>
+        IReadOnlyList<string> GetAvailableDevices();
+
+        /// <summary>
+        /// Returns the product type/model of the specified device (e.g., "NI USB-6001")
+        /// </summary>
+        string GetDeviceType(string deviceName);
+
+        /// <summary>
+        /// Returns the analog-input channel names available on the specified device
+        /// (e.g., "Dev1/ai0", "Dev1/ai1", …)
+        /// </summary>
+        IReadOnlyList<string> GetDeviceChannels(string deviceName);
     }
 }

@@ -1,6 +1,8 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Collections.Generic;
+using System.Linq;
 using PressureDataLogger.Models;
 
 namespace PressureDataLogger.Views;
@@ -18,22 +20,66 @@ public partial class DashboardControl : UserControl
     // Event for valve changes
     public event EventHandler<int>? ValveToggleRequested;
 
+    // Event raised when the user changes the selected device so the parent can
+    // supply the list of channels and device type.
+    public event EventHandler<string>? DeviceSelectionChanged;
+
+    // Event raised when the user clicks Refresh to re-enumerate connected devices.
+    public event EventHandler? RefreshDevicesRequested;
+
     public DashboardControl()
     {
         InitializeComponent();
     }
 
     // Public properties to access configuration values
-    public string DeviceChannel => txtDeviceChannel.Text;
+    public string DeviceChannel
+    {
+        get
+        {
+            var channel = cmbChannel.SelectedItem as string;
+            if (!string.IsNullOrEmpty(channel))
+                return channel;
+            var device = cmbDevice.SelectedItem as string ?? string.Empty;
+            return string.IsNullOrEmpty(device) ? AppConfiguration.DefaultDeviceChannel : $"{device}/ai0";
+        }
+    }
     public string SampleRate => txtSampleRate.Text;
     public string SamplesPerRead => txtSamplesPerRead.Text;
+
+    // ---- Device / channel population helpers called by the parent window ----
+
+    /// <summary>
+    /// Populates the device drop-down with the supplied list.
+    /// </summary>
+    public void LoadDevices(IEnumerable<string> devices)
+    {
+        cmbDevice.ItemsSource = devices.ToList();
+        if (cmbDevice.Items.Count > 0)
+            cmbDevice.SelectedIndex = 0;
+    }
+
+    /// <summary>
+    /// Populates the channel drop-down and updates the device-type label.
+    /// </summary>
+    public void LoadChannels(IEnumerable<string> channels, string deviceType)
+    {
+        txtDeviceType.Text = deviceType;
+        txtDeviceType.FontStyle = FontStyles.Normal;
+        txtDeviceType.Foreground = new SolidColorBrush(Color.FromRgb(33, 150, 243)); // blue
+        cmbChannel.ItemsSource = channels.ToList();
+        if (cmbChannel.Items.Count > 0)
+            cmbChannel.SelectedIndex = 0;
+    }
 
     // Public methods to update UI from parent
     public void SetPressureAcquisitionRunning(bool isRunning)
     {
         btnStart.IsEnabled = !isRunning;
         btnStop.IsEnabled = isRunning;
-        txtDeviceChannel.IsEnabled = !isRunning;
+        cmbDevice.IsEnabled = !isRunning;
+        cmbChannel.IsEnabled = !isRunning;
+        btnRefreshDevices.IsEnabled = !isRunning;
         txtSampleRate.IsEnabled = !isRunning;
         txtSamplesPerRead.IsEnabled = !isRunning;
     }
@@ -105,5 +151,22 @@ public partial class DashboardControl : UserControl
             int valveId = int.Parse(valveIdStr);
             ValveToggleRequested?.Invoke(this, valveId);
         }
+    }
+
+    private void CmbDevice_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (cmbDevice.SelectedItem is string deviceName)
+        {
+            cmbChannel.ItemsSource = null;
+            txtDeviceType.Text = "-- loading --";
+            txtDeviceType.FontStyle = FontStyles.Italic;
+            txtDeviceType.Foreground = new SolidColorBrush(Color.FromRgb(102, 102, 102));
+            DeviceSelectionChanged?.Invoke(this, deviceName);
+        }
+    }
+
+    private void BtnRefreshDevices_Click(object sender, RoutedEventArgs e)
+    {
+        RefreshDevicesRequested?.Invoke(this, EventArgs.Empty);
     }
 }

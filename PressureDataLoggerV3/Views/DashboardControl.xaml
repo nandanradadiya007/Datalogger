@@ -25,6 +25,7 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="150"/>
@@ -33,14 +34,28 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Device/Channel:" VerticalAlignment="Center" Margin="0,5"/>
-                        <TextBox Grid.Row="0" Grid.Column="1" x:Name="txtDeviceChannel" Text="Dev1/ai0" VerticalAlignment="Center" Margin="5" Padding="5"/>
+                        <!-- Row 0: Device selection + device type -->
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Device:" VerticalAlignment="Center" Margin="0,5"/>
+                        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="5,3">
+                            <ComboBox x:Name="cmbDevice" MinWidth="140" VerticalAlignment="Center"
+                                      SelectionChanged="CmbDevice_SelectionChanged"/>
+                            <Button x:Name="btnRefreshDevices" Content="Refresh" Width="65" Height="26"
+                                    Margin="5,0,0,0" Click="BtnRefreshDevices_Click"/>
+                        </StackPanel>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Device Type:" VerticalAlignment="Center" Margin="10,5,0,5"/>
+                        <TextBlock Grid.Row="0" Grid.Column="3" x:Name="txtDeviceType" Text="-- select device --"
+                                   VerticalAlignment="Center" Margin="5" FontStyle="Italic" Foreground="#FF666666"/>
 
-                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Sample Rate (Hz):" VerticalAlignment="Center" Margin="10,5,0,5"/>
-                        <TextBox Grid.Row="0" Grid.Column="3" x:Name="txtSampleRate" Text="1000" VerticalAlignment="Center" Margin="5" Padding="5"/>
+                        <!-- Row 1: Channel selection + sample rate -->
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Channel:" VerticalAlignment="Center" Margin="0,5"/>
+                        <ComboBox Grid.Row="1" Grid.Column="1" x:Name="cmbChannel" VerticalAlignment="Center" Margin="5"/>
 
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Samples Per Read:" VerticalAlignment="Center" Margin="0,5"/>
-                        <TextBox Grid.Row="1" Grid.Column="1" x:Name="txtSamplesPerRead" Text="100" VerticalAlignment="Center" Margin="5" Padding="5"/>
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="Sample Rate (Hz):" VerticalAlignment="Center" Margin="10,5,0,5"/>
+                        <TextBox Grid.Row="1" Grid.Column="3" x:Name="txtSampleRate" Text="1000" VerticalAlignment="Center" Margin="5" Padding="5"/>
+
+                        <!-- Row 2: Samples per read -->
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Samples Per Read:" VerticalAlignment="Center" Margin="0,5"/>
+                        <TextBox Grid.Row="2" Grid.Column="1" x:Name="txtSamplesPerRead" Text="100" VerticalAlignment="Center" Margin="5" Padding="5"/>
                     </Grid>
 
                     <!-- Pressure Controls and Display -->
